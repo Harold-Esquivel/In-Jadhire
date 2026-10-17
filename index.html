@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#09090c">
+  <meta name="description" content="Una invitación especial. Explora los outfits, el lugar y la hora.">
+  <title>Una invitación especial</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #19191e;
+      --muted: #6e6e73;
+      --surface: #f5f5f7;
+      --blue: #0071e3;
+      --radius: 30px;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 58px; }
+    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Arial, sans-serif; color: var(--ink); background: var(--surface); -webkit-font-smoothing: antialiased; }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; }
+    ::selection { background: #b5d8ff; color: #111; }
+    .intro-overlay { position:fixed; inset:0; z-index:200; display:grid; place-items:center; overflow:hidden; color:#fff; background:#08080d; animation:intro-open 2.1s cubic-bezier(.76,0,.24,1) both; }
+    .intro-overlay::before { content:""; position:absolute; width:min(75vw,650px); aspect-ratio:1; border-radius:50%; background:radial-gradient(circle,rgba(150,130,244,.27),rgba(86,180,245,.11) 38%,transparent 70%); filter:blur(25px); animation:intro-glow 1.4s ease-out both; }
+    .intro-lockup { position:relative; display:flex; align-items:center; gap:15px; animation:intro-lockup 1.55s ease both; }
+    .intro-mark { width:25px; height:25px; flex:none; border-radius:50%; background:linear-gradient(135deg,#98e5ff,#9a88f3 55%,#f6c2cc); box-shadow:0 0 32px #a59af777; }
+    .intro-lockup span:last-child { font-size:clamp(24px,5vw,38px); font-weight:650; letter-spacing:-.055em; }
+    @keyframes intro-open { 0%,62% { transform:translateY(0); visibility:visible; pointer-events:auto; } 100% { transform:translateY(-101%); visibility:hidden; pointer-events:none; } }
+    @keyframes intro-lockup { 0% { opacity:0; transform:translateY(18px) scale(.97); } 28%,72% { opacity:1; transform:translateY(0) scale(1); } 100% { opacity:0; transform:translateY(-12px) scale(1.02); } }
+    @keyframes intro-glow { from { opacity:0; transform:scale(.75); } to { opacity:1; transform:scale(1.08); } }
+    @keyframes hero-enter { from { opacity:0; transform:translateY(25px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes scroll-enter { from { opacity:0; transform:translate(-50%,20px); } to { opacity:1; transform:translate(-50%,0); } }
+    .progress { height: 3px; background: linear-gradient(90deg, #72d4fd, #9281fe, #f6acc9); position: fixed; inset: 0 auto auto 0; z-index: 100; width: 0; transition: width .08s linear; }
+    .nav { position: fixed; top: 3px; inset-inline: 0; z-index: 90; height: 59px; color: #f9f9fa; background: rgba(14,14,19,.72); backdrop-filter: saturate(180%) blur(25px); -webkit-backdrop-filter: saturate(180%) blur(25px); border-bottom: 1px solid rgba(255,255,255,.075); }
+    .nav-inner { margin: auto; height: 100%; max-width: 1140px; padding-inline: 24px; display: flex; justify-content: space-between; align-items: center; gap: 24px; }
+    .brand { display: inline-flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 650; letter-spacing: -.035em; white-space: nowrap; }
+    .brand-dot { display: inline-block; width: 15px; height: 15px; border-radius: 50%; background: linear-gradient(135deg,#98e5ff 0%,#9a88f3 55%,#f6c2cc 100%); box-shadow: 0 0 15px rgba(150,145,248,.3); }
+    .nav-links { display: flex; align-items: center; gap: clamp(18px, 3.2vw, 38px); }
+    .nav-links a { font-size: 12px; color: rgba(255,255,255,.64); transition: color .25s; }
+    .nav-links a:hover, .nav-links a.active { color: #fff; }
+    .hero { min-height: 100svh; position: relative; isolation: isolate; overflow: hidden; background: #08080d; display: flex; align-items: center; justify-content: center; color: #fff; text-align: center; padding: 112px 24px 94px; }
+    .hero::before { content:""; position:absolute; inset:0; z-index:-2; background: radial-gradient(ellipse 58% 55% at 50% 56%, #222037 0%, #0a0a10 73%, #08080d 100%); }
+    .hero-ambient { position:absolute; width: min(70vw, 800px); aspect-ratio: 1; left:50%; top:47%; transform:translate(-50%,-50%) rotate(-12deg); border-radius:45% 55% 53% 47%; background: conic-gradient(from 35deg, rgba(126,130,246,.3), rgba(82,200,253,.48), rgba(204,134,235,.65), rgba(252,150,168,.49), rgba(126,130,246,.3)); filter:blur(61px); opacity:.62; z-index:-1; animation: breathe 10s ease-in-out infinite alternate; pointer-events:none; }
+    .hero-orbit { position: absolute; z-index:-1; width: min(60vw, 650px); aspect-ratio: 1; top: 49%; left: 50%; transform: translate(-50%,-50%) rotate(-20deg); border-radius: 50%; border: 1px solid rgba(255,255,255,.075); box-shadow: inset 0 0 120px rgba(255,255,255,.025); pointer-events:none; }
+    .hero-orbit::before { content:""; position:absolute; inset:11%; border:1px solid rgba(255,255,255,.05); border-radius:50%; }
+    @keyframes breathe { from {transform: translate(-50%,-50%) rotate(-18deg) scale(.94); filter:blur(60px)} to {transform: translate(-50%,-50%) rotate(23deg) scale(1.1); filter:blur(75px)} }
+    .hero-content { max-width: 1060px; position: relative; z-index:2; }
+    .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .21em; text-transform: uppercase; }
+    .hero .eyebrow { color: #d6d3e2; }
+    .hero h1 { font-size: clamp(76px, 13vw, 176px); font-weight: 740; letter-spacing: -.095em; line-height: .92; margin: 35px 0 30px; }
+    .hero h1 .hero-line { display: block; }
+    .hero h1 .shine { padding-right: .11em; display: inline-block; background: linear-gradient(100deg,#e7f5ff 6%,#d1c4ff 42%,#feb6d6 86%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .hero-description { max-width: 510px; margin: 0 auto; font-size: clamp(16px, 2vw, 21px); line-height: 1.5; color: rgba(255,255,255,.73); letter-spacing: -.02em; }
+    .hero .eyebrow { animation:hero-enter .85s cubic-bezier(.2,.75,.2,1) 1.3s both; }
+    .hero h1 { animation:hero-enter 1s cubic-bezier(.2,.75,.2,1) 1.42s both; }
+    .hero-description { animation:hero-enter .9s cubic-bezier(.2,.75,.2,1) 1.62s both; }
+    .scroll-down { position: absolute; bottom: clamp(28px, 5vh, 50px); left: 50%; transform: translateX(-50%); display: inline-flex; flex-direction: column; align-items: center; gap: 10px; font-size: 11px; color: rgba(255,255,255,.65); letter-spacing: .03em; transition:color .2s; }
+    .scroll-down:hover { color:#fff; }
+    .scroll-down { animation:scroll-enter .8s cubic-bezier(.2,.75,.2,1) 1.85s both; }
+    .scroll-icon { width: 25px; height: 32px; border: 1px solid rgba(255,255,255,.38); border-radius: 14px; display:flex; justify-content:center; padding-top:7px; }
+    .scroll-icon::before { content:""; display:block; width:3px; height:7px; border-radius:6px; background:#fff; animation:down 2s ease-in-out infinite; }
+    @keyframes down { 0%,100%{transform:translateY(0); opacity:.3} 50%{transform:translateY(8px); opacity:1} }
+    .section-inner { max-width: 1160px; margin: 0 auto; padding: 0 28px; }
+    .gallery { background: #f5f5f7; padding: clamp(110px, 13vw, 176px) 0 clamp(110px, 13vw, 158px); }
+    .section-kicker { display: inline-flex; gap: 12px; align-items:center; font-size: 12px; font-weight:700; color:#81818a; }
+    .section-kicker .line { width:22px; height:1px; background:#a4a4ac; }
+    .section-title { font-size: clamp(48px, 7.3vw, 95px); line-height:1.015; font-weight:735; letter-spacing:-.075em; margin: 24px 0 24px; max-width: 880px; }
+    .section-subtitle { font-size: clamp(16px, 1.8vw, 21px); max-width: 550px; line-height:1.6; color: var(--muted); margin:0; letter-spacing:-.018em; }
+    .outfit-stage { --card-width: min(38vw, 360px); --step: clamp(205px, 25vw, 330px); margin-top: clamp(38px, 6vw, 64px); height: clamp(370px, 49vw, 500px); position:relative; perspective:1100px; overflow:hidden; touch-action:pan-y; outline:none; }
+    .outfit-stage:focus-visible { outline:2px solid var(--blue); outline-offset:4px; border-radius:20px; }
+    .outfit-card { position:absolute; top:50%; left:50%; width:var(--card-width); height:min(94%, 465px); padding:0; border:0; border-radius:26px; overflow:hidden; background:#d8d2db; box-shadow:0 24px 65px rgba(31,29,54,.22); cursor:pointer; opacity:0; pointer-events:none; transform:translate(-50%,-50%) translateX(calc(var(--offset) * var(--step))) rotateY(calc(var(--offset) * -23deg)) scale(.72); transition:transform .62s cubic-bezier(.2,.75,.2,1), opacity .5s ease, box-shadow .5s ease; backface-visibility:hidden; }
+    .outfit-card img { display:block; width:100%; height:100%; object-fit:cover; pointer-events:none; user-select:none; -webkit-user-drag:none; }
+    .outfit-card::after { content:""; position:absolute; inset:0; background:linear-gradient(to top,rgba(11,10,20,.45),transparent 35%); pointer-events:none; }
+    .outfit-card span { position:absolute; z-index:1; left:23px; bottom:22px; color:#fff; font-size:12px; font-weight:700; letter-spacing:.08em; text-shadow:0 1px 8px #0007; }
+    .outfit-card.is-side { opacity:.47; pointer-events:auto; transform:translate(-50%,-50%) translateX(calc(var(--offset) * var(--step))) rotateY(calc(var(--offset) * -23deg)) scale(.82); }
+    .outfit-card.is-current { opacity:1; pointer-events:auto; transform:translate(-50%,-50%) translateX(0) rotateY(0) scale(1); box-shadow:0 30px 75px rgba(31,29,54,.27); }
+    .outfit-card:focus-visible { outline:4px solid var(--blue); outline-offset:-4px; }
+    .outfit-controls { display:flex; justify-content:center; align-items:center; gap:22px; margin-top:16px; }
+    .outfit-arrow { width:46px; height:46px; border:1px solid #d9d9e0; border-radius:50%; background:#fff; color:#282831; cursor:pointer; font-size:24px; line-height:1; transition:background .2s, transform .2s; }
+    .outfit-arrow:hover { background:#e8e8ed; transform:scale(1.06); }
+    .outfit-arrow:focus-visible { outline:2px solid var(--blue); outline-offset:3px; }
+    .outfit-count { min-width:72px; text-align:center; font-size:13px; font-weight:700; letter-spacing:.09em; color:#575761; }
+    .gallery-note { margin:18px 0 0; text-align:center; font-size:12px; color:#87878f; }
+    .place { background: #fff; padding: clamp(120px, 13vw, 185px) 0; }
+    .place-layout { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: clamp(45px, 7.2vw, 115px); align-items:center; }
+    .place .section-title { max-width: 470px; }
+    .place-card { border-radius: 31px; background: #f5f7fa; overflow:hidden; box-shadow: 0 15px 70px rgba(23,31,60,.075); border: 1px solid #e9edf2; }
+    .map-frame { display:block; width:100%; height:330px; border:0; background:#eaf0f6; }
+    .place-info { padding: 28px 30px 32px; }
+    .place-icon { display:flex;align-items:center;gap:9px;color:#666b75;font-size:12px;font-weight:600; }
+    .place-icon svg {height:17px;width:17px;stroke:#0071e3;}
+    .place-info h3 { font-size:clamp(23px,3vw,31px); line-height:1.2; letter-spacing:-.05em; margin:14px 0 8px; }
+    .place-info p { font-size:14px;color:#777d85;line-height:1.5;margin:0; }
+    .map-link { display:none; align-items:center; gap:6px; width:max-content; margin-top:23px; font-size:13px; font-weight:650; color:#0071e3; }
+    .map-link:hover { text-decoration:underline; }
+    .map-link.show { display:inline-flex; }
+    .map-pending { color:#8e929a; font-size:12px; margin-top:23px; display:block; }
+    .map-link.show ~ .map-pending { display:none; }
+    .time { background: #0b0b12; color:#fff; position:relative; isolation:isolate; overflow:hidden; padding: clamp(120px, 14vw, 190px) 0 clamp(130px, 15vw, 200px); min-height: 77svh; display:flex; align-items:center; }
+    .time::before { content:""; z-index:-1; position:absolute; inset:0; background:radial-gradient(ellipse 43% 64% at 65% 56%,#332851 0%,transparent 86%), radial-gradient(ellipse 43% 70% at 12% 88%,#173754 0%,transparent 85%); opacity:.86; }
+    .time-inner { width:100%; text-align:center; }
+    .time .section-kicker {color:#b8b2ce;justify-content:center;}
+    .time .section-kicker .line {background:#716e83;}
+    .time h2 { font-size:clamp(56px,9vw,114px); line-height:1; letter-spacing:-.082em; margin:26px auto 35px; max-width:860px; }
+    .time h2 span { color:#d0c7f9; }
+    .time-desc { color:rgba(255,255,255,.67); font-size:18px;line-height:1.5;margin:0 auto 55px; }
+    .date-card { width:min(100%,650px); margin:auto; border:1px solid rgba(255,255,255,.19); background:rgba(255,255,255,.055); backdrop-filter:blur(22px); border-radius:27px; padding:33px; display:grid; grid-template-columns: 1fr auto 1fr; gap:22px; align-items:center; box-shadow:0 15px 60px rgba(0,0,0,.11); }
+    .date-block { display:flex; flex-direction:column; align-items:center; gap:12px; }
+    .date-label {font-size:11px;letter-spacing:.19em;font-weight:700;color:#b7b5c5;text-transform:uppercase;}
+    .date-value {font-size:clamp(21px,3.5vw,34px);letter-spacing:-.05em;font-weight:650; line-height:1.2;overflow-wrap:anywhere;}
+    .date-divider {height:56px;width:1px;background:rgba(255,255,255,.2);}
+    .closing {text-align:center;color:rgba(255,255,255,.52);margin-top:55px;font-size:13px;}
+    .reveal { opacity:0; transform:translateY(36px); transition: opacity .8s ease, transform .8s cubic-bezier(.2,.85,.28,1); }
+    .reveal.visible { opacity:1;transform:translateY(0); }
+    .reveal.delay-1 {transition-delay:.13s;}
+    .reveal.delay-2 {transition-delay:.25s;}
+    @media (max-width: 800px) {
+      .place-layout { grid-template-columns:1fr; gap:48px; }
+      .place .section-title { max-width:780px; }
+      .place-card { max-width:660px; width:100%; }
+      .hero-ambient { width:90vw; }
+    }
+    @media (max-width: 570px) {
+      .nav {height:55px;}
+      .nav-inner {padding-inline:19px;gap:12px;}
+      .brand {font-size:12px;gap:7px;}
+      .brand-dot {width:12px;height:12px;}
+      .nav-links {gap:13px;}
+      .nav-links a {font-size:11px;}
+      .hero {padding:96px 19px 88px;}
+      .hero h1 {font-size:clamp(62px,15vw,92px);margin:27px 0 25px;}
+      .hero-description {font-size:16px;max-width:320px;}
+      .hero-orbit {width:86vw;}
+      .hero-ambient {width:107vw;}
+      .section-inner {padding-inline:22px;}
+      .gallery {padding-block:103px 113px;}
+      .section-title {font-size:clamp(45px,11vw,66px);letter-spacing:-.075em;}
+      .outfit-stage {--card-width:min(64vw, 310px);--step:clamp(160px, 48vw, 230px);height:390px;margin-top:36px;}
+      .outfit-card {height:350px;border-radius:20px;}
+      .outfit-card span {left:16px;bottom:17px;font-size:10px;}
+      .gallery-note {font-size:11px;}
+      .place {padding-block:105px;}
+      .place-layout {gap:39px;}
+      .map-frame {height:270px;}
+      .place-card {border-radius:23px;}
+      .place-info {padding:25px;}
+      .time {padding-block:115px 125px;min-height: 79svh;}
+      .time h2 {font-size:clamp(55px,14vw,77px);}
+      .time-desc {font-size:16px;margin-bottom:33px;}
+      .date-card {grid-template-columns:1fr; gap:19px;padding:32px 20px;}
+      .date-divider {height:1px;width:55px;margin:auto;}
+      .date-block {gap:9px;}
+      .date-value {font-size:27px;}
+    }
+    @media (prefers-reduced-motion:reduce) {
+      *,*::before,*::after { animation-duration:.01ms !important; animation-delay:0ms !important; scroll-behavior:auto !important; transition-duration:.01ms !important; }
+      .intro-overlay {display:none;}
+      .reveal {opacity:1;transform:none;}
+    }
+  </style>
+</head>
+<body>
+  <div class="intro-overlay" aria-hidden="true"><div class="intro-lockup"><span class="intro-mark"></span><span>Una invitación.</span></div></div>
+  <!--
+    PERSONALIZACIÓN RÁPIDA:
+    1. Busca "const EVENTO" en la parte final de este archivo.
+    2. Cambia los textos (título, mensaje, lugar, dirección, fecha y hora).
+    3. El arreglo fotos usa las nueve imágenes JPEG de esta misma carpeta.
+    4. Al publicar, sube index.html junto con esas nueve imágenes.
+  -->
+  <div class="progress" id="progress"></div>
+  <nav class="nav" aria-label="Navegación principal">
+    <div class="nav-inner">
+      <a href="#inicio" class="brand" aria-label="Volver al inicio"><span class="brand-dot"></span>Una invitación</a>
+      <div class="nav-links">
+        <a href="#imagenes">Outfits</a><a href="#lugar">Lugar</a><a href="#hora">Hora</a>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <section id="inicio" class="hero" aria-labelledby="hero-title">
+      <div class="hero-ambient" aria-hidden="true"></div>
+      <div class="hero-orbit" aria-hidden="true"></div>
+      <div class="hero-content">
+        <p class="eyebrow" id="hero-label">UNA OCASIÓN ESPECIAL</p>
+        <h1 id="hero-title"><span class="hero-line" id="hero-line-1">Estás</span><span class="hero-line shine" id="hero-line-2">invitado.</span></h1>
+        <p class="hero-description" id="hero-description">Hay momentos que se vuelven inolvidables cuando los compartimos contigo.</p>
+      </div>
+      <a href="#imagenes" class="scroll-down" aria-label="Deslizar hacia las imágenes">
+        <span>Desliza para descubrir</span><span class="scroll-icon" aria-hidden="true"></span>
+      </a>
+    </section>
+
+    <section id="imagenes" class="gallery" aria-labelledby="gallery-title">
+      <div class="section-inner">
+        <div class="reveal"><div class="section-kicker"><span class="line"></span>01 / OUTFITS</div><h2 class="section-title" id="gallery-title">Elige el outfit<br>con el que quisieras ir.</h2><p class="section-subtitle">Explora las opciones y encuentra tu favorito.</p></div>
+        <div class="outfit-stage reveal delay-1" id="outfit-stage" role="region" aria-roledescription="carrusel" aria-label="Opciones de outfit" tabindex="0"></div>
+        <div class="outfit-controls reveal delay-1">
+          <button class="outfit-arrow" id="outfit-prev" type="button" aria-label="Ver outfit anterior">‹</button>
+          <span class="outfit-count" id="outfit-count" role="status" aria-live="polite"></span>
+          <button class="outfit-arrow" id="outfit-next" type="button" aria-label="Ver siguiente outfit">›</button>
+        </div>
+        <p class="gallery-note">Toca una foto lateral o desliza para ver más.</p>
+      </div>
+    </section>
+
+    <section id="lugar" class="place" aria-labelledby="place-title">
+      <div class="section-inner place-layout">
+        <div class="reveal"><div class="section-kicker"><span class="line"></span>02 / LUGAR</div><h2 class="section-title" id="place-title">Aquí nos<br>encontramos.</h2><p class="section-subtitle">Lo importante no es solo dónde, sino con quién compartimos el momento.</p></div>
+        <div class="place-card reveal delay-1">
+          <iframe class="map-frame" title="Mapa de la ubicación del evento en Arequipa" src="https://www.google.com/maps?q=-16.383501,-71.554484&amp;z=17&amp;output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+          <div class="place-info">
+            <div class="place-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg> EL LUGAR</div>
+            <h3 id="place-name">Ubicación del evento</h3>
+            <p id="place-address">Arequipa, Perú. Abre Google Maps para ver el punto señalado y cómo llegar.</p>
+            <a id="map-link" class="map-link" href="#" target="_blank" rel="noopener noreferrer">Abrir en Google Maps <span aria-hidden="true">↗</span></a>
+            <span id="map-pending" class="map-pending">La ubicación se compartirá próximamente.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="hora" class="time" aria-labelledby="time-title">
+      <div class="section-inner time-inner">
+        <div class="reveal">
+          <div class="section-kicker"><span class="line"></span>03 / HORA</div>
+          <h2 id="time-title">El momento<br><span>perfecto.</span></h2>
+          <p class="time-desc">Reserva un espacio para compartir algo especial.</p>
+        </div>
+        <div class="date-card reveal delay-1">
+          <div class="date-block"><span class="date-label">FECHA</span><span class="date-value" id="event-date">21 de noviembre de 2026</span></div>
+          <span class="date-divider" aria-hidden="true"></span>
+          <div class="date-block"><span class="date-label">HORA</span><span class="date-value" id="event-time">Por confirmar</span></div>
+        </div>
+        <p class="closing reveal delay-2">Será un gusto compartir este momento contigo.</p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // ===============================================================
+    // EDITA SOLO ESTOS DATOS PARA PERSONALIZAR TU INVITACIÓN
+    // ===============================================================
+    const EVENTO = {
+      etiqueta: "UNA OCASIÓN ESPECIAL",
+      tituloPrimeraLinea: "Estás",
+      tituloSegundaLinea: "invitado.",
+      mensaje: "Hay momentos que se vuelven inolvidables cuando los compartimos contigo.",
+      lugar: "Ubicación del evento",
+      direccion: "Arequipa, Perú. Abre Google Maps para ver el punto señalado y cómo llegar.",
+      enlaceGoogleMaps: "https://maps.app.goo.gl/CqiTiQiq2n17qRXR6",
+      fecha: "21 de noviembre de 2026",
+      hora: "8:00 p. m.",
+      fotos: [
+        "WhatsApp Image 2026-10-12 at 9.56.20 PM (1).jpeg",
+        "WhatsApp Image 2026-10-12 at 9.56.20 PM.jpeg",
+        "WhatsApp Image 2026-10-12 at 9.56.27 PM.jpeg",
+        "WhatsApp Image 2026-10-12 at 9.56.30 PM.jpeg",
+        "WhatsApp Image 2026-10-12 at 9.56.36 PM.jpeg",
+        "WhatsApp Image 2026-10-12 at 9.56.40 PM.jpeg",
+        "WhatsApp Image 2026-10-12 at 9.56.52 PM.jpeg",
+        "WhatsApp Image 2026-10-12 at 9.56.54 PM.jpeg",
+        "WhatsApp Image 2026-10-12 at 9.58.00 PM.jpeg"
+      ]
+    };
+    // ===============================================================
+
+    document.getElementById("hero-label").textContent = EVENTO.etiqueta;
+    document.getElementById("hero-line-1").textContent = EVENTO.tituloPrimeraLinea;
+    document.getElementById("hero-line-2").textContent = EVENTO.tituloSegundaLinea;
+    document.getElementById("hero-description").textContent = EVENTO.mensaje;
+    document.getElementById("place-name").textContent = EVENTO.lugar;
+    document.getElementById("place-address").textContent = EVENTO.direccion;
+    document.getElementById("event-date").textContent = EVENTO.fecha;
+    document.getElementById("event-time").textContent = EVENTO.hora;
+    document.title = EVENTO.tituloPrimeraLinea + " " + EVENTO.tituloSegundaLinea + " | Invitación";
+
+    if (/^https:\/\//i.test(EVENTO.enlaceGoogleMaps)) {
+      const link = document.getElementById("map-link");
+      link.href = EVENTO.enlaceGoogleMaps;
+      link.classList.add("show");
+      document.getElementById("map-pending").hidden = true;
+    }
+    const outfitStage = document.getElementById("outfit-stage");
+    const outfitCount = document.getElementById("outfit-count");
+    let currentOutfit = 0;
+    const outfitCards = EVENTO.fotos.map((src, index) => {
+      const card = document.createElement("button");
+      card.type = "button";
+      card.className = "outfit-card";
+      card.setAttribute("aria-label", `Outfit ${index + 1} de ${EVENTO.fotos.length}`);
+      const img = document.createElement("img");
+      img.src = src;
+      img.alt = `Opción de outfit ${index + 1}`;
+      img.loading = index < 3 || index === EVENTO.fotos.length - 1 ? "eager" : "lazy";
+      img.draggable = false;
+      const caption = document.createElement("span");
+      caption.textContent = `OUTFIT ${String(index + 1).padStart(2, "0")}`;
+      card.append(img, caption);
+      card.addEventListener("click", () => {
+        if (ignoreOutfitClick) return;
+        if (index === currentOutfit) return;
+        showOutfit(index);
+      });
+      outfitStage.append(card);
+      return card;
+    });
+
+    function showOutfit(index) {
+      const total = outfitCards.length;
+      if (!total) return;
+      currentOutfit = (index + total) % total;
+      outfitCards.forEach((card, i) => {
+        let offset = i - currentOutfit;
+        if (offset > total / 2) offset -= total;
+        if (offset < -total / 2) offset += total;
+        const visible = Math.abs(offset) <= 1;
+        card.style.setProperty("--offset", offset);
+        card.style.zIndex = visible ? String(2 - Math.abs(offset)) : "0";
+        card.classList.toggle("is-current", offset === 0);
+        card.classList.toggle("is-side", Math.abs(offset) === 1);
+        card.setAttribute("aria-hidden", String(!visible));
+        card.tabIndex = visible ? 0 : -1;
+      });
+      outfitCount.textContent = `${currentOutfit + 1} / ${total}`;
+    }
+    showOutfit(0);
+    document.getElementById("outfit-prev").addEventListener("click", () => showOutfit(currentOutfit - 1));
+    document.getElementById("outfit-next").addEventListener("click", () => showOutfit(currentOutfit + 1));
+    outfitStage.addEventListener("keydown", event => {
+      if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+        event.preventDefault();
+        showOutfit(currentOutfit + (event.key === "ArrowRight" ? 1 : -1));
+      }
+    });
+    let swipeStart = null;
+    let ignoreOutfitClick = false;
+    outfitStage.addEventListener("pointerdown", event => {
+      swipeStart = {x:event.clientX, y:event.clientY};
+    });
+    outfitStage.addEventListener("pointerup", event => {
+      if (!swipeStart) return;
+      const dx = event.clientX - swipeStart.x;
+      const dy = event.clientY - swipeStart.y;
+      swipeStart = null;
+      if (Math.abs(dx) > 35 && Math.abs(dx) > Math.abs(dy)) {
+        showOutfit(currentOutfit + (dx < 0 ? 1 : -1));
+        ignoreOutfitClick = true;
+        window.setTimeout(() => { ignoreOutfitClick = false; }, 0);
+      }
+    });
+    outfitStage.addEventListener("pointercancel", () => { swipeStart = null; });
+    const reveals = document.querySelectorAll(".reveal");
+    if ("IntersectionObserver" in window) {
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) { entry.target.classList.add("visible"); observer.unobserve(entry.target); }
+        });
+      }, {threshold:.12, rootMargin:"0px 0px -25px 0px"});
+      reveals.forEach(el => observer.observe(el));
+    } else { reveals.forEach(el => el.classList.add("visible")); }
+
+    const progress = document.getElementById("progress");
+    const navLinks = [...document.querySelectorAll(".nav-links a")];
+    const sections = [...document.querySelectorAll("main > section")];
+    let ticking = false;
+    function updateScroll() {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      progress.style.width = (max > 0 ? window.scrollY / max * 100 : 0) + "%";
+      const position = window.scrollY + window.innerHeight * .4;
+      let current = "inicio";
+      for (const section of sections) if (section.offsetTop <= position) current = section.id;
+      navLinks.forEach(link => {
+        const active = link.getAttribute("href") === "#" + current;
+        link.classList.toggle("active", active);
+        if (active) link.setAttribute("aria-current", "location"); else link.removeAttribute("aria-current");
+      });
+      ticking = false;
+    }
+    window.addEventListener("scroll", () => {
+      if (!ticking) { window.requestAnimationFrame(updateScroll); ticking = true; }
+    }, {passive:true});
+    window.addEventListener("resize", updateScroll);
+    updateScroll();
+  </script>
+</body>
+</html>
